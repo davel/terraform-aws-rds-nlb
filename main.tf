@@ -1,6 +1,6 @@
 resource "aws_sns_topic" "this" {
-  name = "${var.name}-rds-events"
-  tags = var.tags
+  name              = "${var.name}-rds-events"
+  tags              = var.tags
   kms_master_key_id = var.sns_kms_key_id
 }
 
@@ -56,7 +56,7 @@ module "lambda_function" {
   create_current_version_allowed_triggers   = false
   create_unqualified_alias_allowed_triggers = true
   allowed_triggers = {
-    allowFromSNS= {
+    allowFromSNS = {
       service    = "sns"
       source_arn = aws_sns_topic.this.arn
     }
@@ -64,26 +64,26 @@ module "lambda_function" {
 
   attach_policy_statements = true
   policy_statements = {
-   createNetIfaces = {
-     effect = "Allow"
-     actions = [
-       "elasticloadbalancing:RegisterTargets",
-       "elasticloadbalancing:DeregisterTargets",
-       "elasticloadbalancing:DescribeTargetHealth",
-       "ec2:CreateNetworkInterface",
-       "ec2:DescribeNetworkInterfaces",
-       "ec2:DeleteNetworkInterface"
-     ]
-     resources = [ "*" ]
-   }
-   writeLogs = {
-     effect = "Allow"
-     actions = [
+    createNetIfaces = {
+      effect = "Allow"
+      actions = [
+        "elasticloadbalancing:RegisterTargets",
+        "elasticloadbalancing:DeregisterTargets",
+        "elasticloadbalancing:DescribeTargetHealth",
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface"
+      ]
+      resources = ["*"]
+    }
+    writeLogs = {
+      effect = "Allow"
+      actions = [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
-     ]
-     resources = ["arn:aws:logs:*:*:*"]
+      ]
+      resources = ["arn:aws:logs:*:*:*"]
     }
   }
 
@@ -102,9 +102,9 @@ module "lambda_function" {
 # You want to register your db_instances when your apply
 # this module. Don't you ?
 data "aws_lambda_invocation" "this" {
-   function_name = module.lambda_function.lambda_function_qualified_arn
+  function_name = module.lambda_function.lambda_function_qualified_arn
 
-   input = <<EOJSON
+  input = <<EOJSON
  {
    "Origin": "terraform invokation of ${var.name}"
  }
